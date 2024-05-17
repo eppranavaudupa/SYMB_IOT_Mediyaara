@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Input Form</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+<form id="myForm">
+  <!-- Input 1 -->
+  <label for="input1">Tablet 1:</label><br>
+  <input type="text" id="input1" name="tablet1"><br>
+  <label for="tablet1-morning">Morning</label>
+  <input type="checkbox" id="tablet1-morning" name="tablet1-time" value="morning">
+  <label for="tablet1-afternoon">Afternoon</label>
+  <input type="checkbox" id="tablet1-afternoon" name="tablet1-time" value="afternoon">
+  <label for="tablet1-night">Night</label>
+  <input type="checkbox" id="tablet1-night" name="tablet1-time" value="night"><br><br>
+
+  <!-- Input 2 -->
+  <label for="input2">Tablet 2:</label><br>
+  <input type="text" id="input2" name="tablet2"><br>
+  <label for="tablet2-morning">Morning</label>
+  <input type="checkbox" id="tablet2-morning" name="tablet2-time" value="morning">
+  <label for="tablet2-afternoon">Afternoon</label>
+  <input type="checkbox" id="tablet2-afternoon" name="tablet2-time" value="afternoon">
+  <label for="tablet2-night">Night</label>
+  <input type="checkbox" id="tablet2-night" name="tablet2-time" value="night"><br><br>
+
+  <!-- Input 3 -->
+  <label for="input3">Tablet 3:</label><br>
+  <input type="text" id="input3" name="tablet3"><br>
+  <label for="tablet3-morning">Morning</label>
+  <input type="checkbox" id="tablet3-morning" name="tablet3-time" value="morning">
+  <label for="tablet3-afternoon">Afternoon</label>
+  <input type="checkbox" id="tablet3-afternoon" name="tablet3-time" value="afternoon">
+  <label for="tablet3-night">Night</label>
+  <input type="checkbox" id="tablet3-night" name="tablet3-time" value="night"><br><br>
+
+  <!-- Start Date and Time -->
+  <label for="start-date">Start Date</label>
+  <input type="date" id="start-date" name="start-date">
+  <label for="start-time">Start Time</label>
+  <input type="time" id="start-time" name="start-time"><br><br>
+
+  <input type="submit" value="Submit">
+</form>
+
+<button id="savePdfButton">Save as PDF</button>
+
+<script>
+document.getElementById("myForm").addEventListener("submit", function(event) {
+  event.preventDefault(); // Prevent the form from submitting normally
+
+  // Submit the form data to the backend using fetch API
+  fetch('/submit', {
+    method: 'POST',
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(Object.fromEntries(new FormData(event.target)))
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
+  .then(data => {
+    // Handle the response from the backend
+    console.log('Response from backend:', data);
+  })
+  .catch(error => {
+    console.error('There was a problem with the fetch operation:', error);
+  })
+  .finally(() => {
+    // Generate PDF after form data is submitted successfully
+    generatePDF();
+  });
+});
+
+function generatePDF() {
+  const formData = new FormData(document.getElementById("myForm"));
+  const inputData = {};
+
+  formData.forEach((value, key) => {
+    if (!inputData[key]) {
+      inputData[key] = value;
+    } else {
+      if (!Array.isArray(inputData[key])) {
+        inputData[key] = [inputData[key]];
+      }
+      inputData[key].push(value);
+    }
+  });
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  // Set heading as "Mediyaara"
+  doc.setFontSize(16);
+  doc.text("Mediyaara", 10, 10);
+
+  // Set border for the page
+  doc.rect(5, 5, doc.internal.pageSize.width - 10, doc.internal.pageSize.height - 10);
+
+  let y = 30; // Start position below the heading
+  for (const key in inputData) {
+    if (Array.isArray(inputData[key])) {
+      inputData[key].forEach(val => {
+        doc.text(`${key}: ${val}`, 10, y);
+        y += 10;
+      });
+    } else {
+      doc.text(`${key}: ${inputData[key]}`, 10, y);
+      y += 10;
+    }
+  }
+
+  // Save the PDF as a Blob
+  doc.save("form_data.pdf");
+}
+
+document.getElementById("savePdfButton").addEventListener("click", function() {
+  generatePDF();
+});
+</script>]
+
+</body>
+</html>

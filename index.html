@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Input Field and Checkboxes</title>
+</head>
+<body>
+
+<form id="myForm">
+  <label for="userInput">Input:</label><br>
+  <input type="text" id="userInput" name="userInput"><br><br>
+  
+  <label for="morning">Morning</label>
+  <input type="checkbox" id="morning" name="time" value="morning"><br>
+  
+  <label for="afternoon">Afternoon</label>
+  <input type="checkbox" id="afternoon" name="time" value="afternoon"><br>
+  
+  <label for="night">Night</label>
+  <input type="checkbox" id="night" name="time" value="night"><br><br>
+  
+  <input type="submit" value="Submit">
+</form>
+
+<script>
+document.getElementById("myForm").addEventListener("submit", function(event) {
+  event.preventDefault(); // Prevent the form from submitting normally
+
+  // Get the form data
+  var formData = new FormData(this);
+
+  // Send the form data to the backend using fetch API or other methods
+  fetch('/your/backend/endpoint', {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
+  .then(data => {
+    // Handle the response from the backend
+    console.log('Response from backend:', data);
+  })
+  .catch(error => {
+    console.error('There was a problem with the fetch operation:', error);
+  });
+});
+</script>
+
+</body>
+</html>
